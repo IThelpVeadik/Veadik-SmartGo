@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Veadik SmartGo</title>
   <style>
     body {
@@ -14,11 +14,12 @@
       flex-direction: column;
       min-height: 100vh;
       align-items: center;
+      justify-content: center;
+      text-align: center;
     }
 
     header {
       margin-top: 60px;
-      text-align: center;
     }
 
     h1 {
@@ -30,89 +31,74 @@
     .subtext {
       font-size: 1rem;
       color: #666;
-      margin: 8px 0 30px;
-    }
-
-    .button-wrapper {
-      margin-bottom: 40px;
-      width: 90%;
-      max-width: 400px;
+      margin-bottom: 30px;
     }
 
     .btn {
-      width: 100%;
-      background-color: #FFA726;
-      border: none;
-      padding: 15px;
+      padding: 15px 30px;
       font-size: 18px;
+      border: none;
       border-radius: 10px;
       cursor: pointer;
-      color: white;
-      transition: background-color 0.3s ease;
+      transition: 0.3s ease-in-out;
+      width: 180px;
+      margin: 10px;
     }
 
-    .btn:hover {
+    .checkin {
       background-color: #28a745;
+      color: white;
     }
 
-    #log {
-      width: 90%;
-      max-width: 600px;
-      background: #fff;
-      border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 60px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    .checkin:hover {
+      background-color: #218838;
     }
 
-    #log h3 {
-      margin-top: 0;
+    .checkout {
+      background-color: #dc3545;
+      color: white;
+    }
+
+    .checkout:hover {
+      background-color: #c82333;
+    }
+
+    #buttons {
+      margin-bottom: 40px;
+    }
+
+    #toast {
+      display: none;
+      position: fixed;
+      top: 20%;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #fff;
+      border: 2px solid #28a745;
+      color: #28a745;
+      padding: 25px 35px;
       font-size: 18px;
-      color: #333;
-      border-bottom: 1px solid #ddd;
-      padding-bottom: 10px;
+      border-radius: 15px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+      z-index: 9999;
     }
 
-    .log-card {
-      background-color: #f0f0f0;
-      margin: 12px 0;
-      padding: 10px 15px;
-      border-radius: 8px;
-      font-size: 15px;
-      color: #333;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .name {
-      font-weight: 600;
-      color: #333;
-      flex: 1;
-      text-align: left;
-    }
-
-    .log-right {
-      font-size: 14px;
-      color: #555;
-      text-align: right;
+    #toast p {
+      margin: 10px 0;
     }
 
     footer {
       margin-top: auto;
       padding: 15px 0;
       text-align: center;
-      font-size: 0.8rem;
+      font-size: 0.85rem;
       color: #888;
     }
 
-    @media (min-width: 600px) {
-      h1 {
-        font-size: 2.2rem;
-      }
-
-      .subtext {
-        font-size: 1.1rem;
+    @media (max-width: 480px) {
+      .btn {
+        width: 90%;
+        font-size: 16px;
       }
     }
   </style>
@@ -124,41 +110,55 @@
     <div class="subtext">Attendance</div>
   </header>
 
-  <div class="button-wrapper">
-    <button class="btn" onclick="window.open('https://script.google.com/a/macros/veadik.com/s/AKfycbwOa6PBH6C4i_Jw-jxeP4L5cU-VdC8VAm8GtOLuduzjLYvjd81nHjk5KQhBegdf_7-qHw/exec', '_blank')">
-      Allow Location & Mark Attendance
-    </button>
+  <div id="buttons">
+    <button class="btn checkin" onclick="submitAttendance('🟢Check-In')">Check-In</button>
+    <button class="btn checkout" onclick="submitAttendance('🔴Check-Out')">Check-Out</button>
   </div>
 
-  <div id="log">
-    <h3>Today’s Log</h3>
-    <div id="logContent"><p>Loading...</p></div>
-  </div>
+  <div id="toast"></div>
 
-  <footer>© 2025 Veadik SmartGo</footer>
+  <footer>Powered by Veadik SmartGo • Secure & Smart Attendance</footer>
 
   <script>
-    fetch("https://script.google.com/macros/s/AKfycbzJ_0TkDXSbtyGa61ywNkmYCMLU1lj8h-7KZqH5o5p315M8KiJAyTnsMqxiDRiGC9Hu/exec")
-      .then(res => res.json())
-      .then(data => {
-        const today = new Date().toISOString().slice(0, 10);
-        const logs = data.filter(r => r[2]?.includes(today));
+    function showToast(message) {
+      document.getElementById("buttons").style.display = "none";
 
-        const html = logs.map(r => {
-          const time = new Date(r[2]).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-          return `
-            <div class="log-card">
-              <div class="name">📌 ${r[0]}</div>
-              <div class="log-right">${r[1]} at ${time}</div>
-            </div>
-          `;
-        }).join("");
+      const toast = document.getElementById("toast");
+      toast.innerHTML = `<p>${message}</p><p>📌 Please close this tab</p>`;
+      toast.style.display = "block";
 
-        document.getElementById("logContent").innerHTML = html || '<p>No entries yet.</p>';
-      })
-      .catch(() => {
-        document.getElementById("logContent").innerHTML = "<p>Error loading log data.</p>";
-      });
+      setTimeout(() => {
+        window.close();
+      }, 3000);
+    }
+
+    function submitAttendance(type) {
+      if (!navigator.geolocation) {
+        showToast("❌ Location not supported.");
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+
+          const baseUrl = "https://script.google.com/a/macros/veadik.com/s/AKfycbwA008Qci6PRncTqEHg6RiDbLDGhx6HjkFUX3N0DJzW43kr7SxhWAqBOMxMxXKcn3Un/exec";
+          const fullUrl = `${baseUrl}?type=${encodeURIComponent(type)}&lat=${lat}&lng=${lng}`;
+          window.open(fullUrl, "_blank");
+
+          if (type === "🟢Check-In") {
+            showToast("✅ Check-In Attempted");
+          } else if (type === "🔴Check-Out") {
+            showToast("⛔ Check-Out Attempted");
+          }
+        },
+        (err) => {
+          showToast("❌ Location error. Allow location access.");
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
+      );
+    }
   </script>
 
 </body>
